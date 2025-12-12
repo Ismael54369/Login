@@ -72,3 +72,10 @@ CREATE TABLE login_attempts (
 -- Usuario de prueba: ismael_usuario / Contraseña: Admin1234@
 INSERT INTO usuario (nombre, apellidos, idusuario, password) VALUES 
 ('Ismael', 'Gonzalez', 'ismael_usuario', '$2y$10$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquii.V3TtI93eYz.n.8EC');
+
+## 💻 Tecnologías Utilizadas
+Lenguaje: [Ej: Python, JavaScript, C++]
+
+Librerías: [Ej: Pandas, NumPy, React]
+
+Herramientas: [Ej: Visual Studio Code, Git]
