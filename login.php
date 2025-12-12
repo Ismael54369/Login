@@ -1,149 +1,162 @@
 <?php
+// 1. CONFIGURACIÓN DE SEGURIDAD (punto 2 y 5)
+ini_set('session.cookie_httponly', 1);
+ini_set('session.use_only_cookies', 1);
+ini_set('session.cookie_samesite', 'Strict');
+session_set_cookie_params(['lifetime' => 7200, 'path' => '/', 'httponly' => true, 'samesite' => 'Strict']);
 session_start();
+
+// 2. TOKEN CSRF
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión</title>
-
+    <title>Login Arcade</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Íconos -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Fuente -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
     <style>
+        /* ESTILOS VIDEOJUEGO RETRO */
         body {
-            margin: 0;
-            height: 100vh;
-            background: linear-gradient(135deg, #87CEFA, #6C63FF);
-            font-family: "Poppins", sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background-color: #1a1a1a;
+            background-image: linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px; /* Efecto cuadrícula */
+            font-family: 'Press Start 2P', cursive; /* Fuente pixelada */
+            color: #0f0; /* Verde terminal */
         }
 
-        .login-card {
-            width: 380px;
-            padding: 40px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 18px;
-            backdrop-filter: blur(14px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-            animation: fadeIn 0.8s ease-in-out;
+        .game-container {
+            border: 4px solid #0f0;
+            background-color: #000;
+            box-shadow: 10px 10px 0px #004400; /* Sombra sólida */
+            image-rendering: pixelated;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .login-title {
-            font-weight: 600;
-            font-size: 26px;
+        h3 {
+            text-shadow: 2px 2px #ff00de; /* Sombra rosa neón */
             color: #fff;
-            text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
+            font-size: 20px;
+            line-height: 1.5;
+        }
+
+        label {
+            color: #ff00de; /* Rosa neón */
+            font-size: 10px;
+            margin-bottom: 5px;
+            display: block;
         }
 
         .form-control {
-            height: 50px;
-            border-radius: 12px;
-            border: none;
-            padding-left: 15px;
-            background: rgba(255, 255, 255, 0.25);
-            color: #fff;
-        }
-
-        .form-control::placeholder {
-            color: #f0f0f0;
+            background-color: #000;
+            border: 2px solid #555;
+            color: #0f0;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            border-radius: 0; /* Bordes cuadrados */
         }
 
         .form-control:focus {
-            background: rgba(255, 255, 255, 0.3);
+            background-color: #111;
+            color: #0f0;
+            border-color: #0f0;
             box-shadow: none;
-            color: #fff;
         }
 
-        .btn-login {
-            width: 100%;
-            height: 50px;
-            border-radius: 12px;
-            background: #ffffff;
-            color: #6C63FF;
-            font-weight: 600;
+        .btn-game {
+            background-color: #ff00de;
             border: none;
-            transition: 0.3s;
-        }
-
-        .btn-login:hover {
-            background: #f1f1f1;
-            transform: translateY(-2px);
-        }
-
-        .info-text {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 14px;
             color: #fff;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            padding: 15px;
+            text-transform: uppercase;
+            border: 4px solid #fff;
+            width: 100%;
+            cursor: pointer;
+            transition: transform 0.1s;
         }
 
-        a {
+        .btn-game:hover {
+            background-color: #fff;
+            color: #ff00de;
+            transform: translateY(2px);
+        }
+
+        .btn-game:active {
+            transform: translateY(4px);
+        }
+
+        .alert-retro {
+            background-color: #500;
             color: #fff;
-            font-weight: 600;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .alert {
+            border: 2px solid #f00;
+            font-size: 10px;
+            margin-bottom: 20px;
             padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 15px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0.7; }
+        }
+
+        .scanline {
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 50%, rgba(0,255,0,0.1) 50%);
+            background-size: 100% 4px;
+            position: fixed;
+            top: 0;
+            pointer-events: none;
+            height: 100vh;
         }
     </style>
 </head>
+<body class="d-flex justify-content-center align-items-center vh-100">
 
-<body>
+    <div class="scanline"></div> <div class="game-container p-5" style="width: 450px;">
+        <div class="text-center mb-4">
+            <span style="color: yellow; font-size: 10px;">INSERT COIN</span>
+        </div>
+        
+        <h3 class="text-center">PLAYER 1<br>LOGIN</h3>
 
-<div class="login-card">
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert-retro text-center">
+                GAME ERROR:<br>
+                <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+            </div>
+        <?php endif; ?>
 
-    <div class="login-title">
-        <i class="fa-solid fa-circle-user"></i> Iniciar Sesión
+        <form method="POST" action="autenticacion.php" id="loginForm">
+            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+
+            <div class="mb-4">
+                <label>> USERNAME_</label>
+                <input type="text" name="identificador" id="userInput" class="form-control" placeholder="...">
+                <div id="userError" class="text-danger small mt-2" style="font-size: 8px; display:none;"></div>
+            </div>
+
+            <div class="mb-4">
+                <label>> PASSWORD_</label>
+                <input type="password" name="password" id="passInput" class="form-control" placeholder="***">
+                <div id="passError" class="text-danger small mt-2" style="font-size: 8px; display:none;"></div>
+            </div>
+
+            <button type="submit" class="btn-game">PRESS START</button>
+        </form>
+        
+        <div class="text-center mt-3" style="font-size: 8px; color: #555;">
+            v.1.0 © 2025 SECURE SYSTEM
+        </div>
     </div>
 
-    <?php
-    if (isset($_SESSION['error'])) {
-        echo '<div class="alert alert-danger text-center">'.$_SESSION['error'].'</div>';
-        unset($_SESSION['error']);
-    }
-    ?>
-
-    <form method="POST" action="./autenticacion.php">
-
-        <div class="mb-3">
-            <input type="text" name="identificador" class="form-control" placeholder="Usuario">
-        </div>
-
-        <div class="mb-3">
-            <input type="password" name="password" class="form-control" placeholder="Contraseña">
-        </div>
-
-        <button type="submit" class="btn-login">Entrar</button>
-
-    </form>
-
-    <p class="info-text">
-        ¿Olvidaste tu contraseña?  
-        <a href="#">Recupérala aquí</a>
-    </p>
-
-</div>
-
+    <script src="validacion.js"></script>
 </body>
 </html>
