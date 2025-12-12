@@ -1,58 +1,80 @@
 <?php
-    session_start(); // pendiente de hacer segura
+// 1. CONFIGURACIÓN SESIÓN SEGURA (Repetimos código al no haber conexion.php)
+ini_set('session.cookie_httponly', 1);
+ini_set('session.use_only_cookies', 1);
+ini_set('session.cookie_samesite', 'Strict');
+session_set_cookie_params(['lifetime' => 7200, 'path' => '/', 'httponly' => true, 'samesite' => 'Strict']);
+session_start();
 
-    if (isset($_POST['identificador'])) {
-        
-        // inicialización de parámetros de conexión
-        $host = 'localhost';
-        $usuario = 'root';          // inseguro
-        $password = '';             // inseguro
-        $baseDatos = 'usuarios';
-
-        // establecimiento de conexión
-        $mysqli = new mysqli($host, $usuario, $password, $baseDatos);
-
-        if ($mysqli->connect_error) {
-            $_SESSION['error'] = "No se puede comprobar usuario en estos momentos. Vuelva a intentarlo en unos minutos.";
-            header('Location: ./login.php');
-            // die('Error de conexión: ' . $mysqli->connect_errno); // deja de ejecutar codigo
-        }
-
-        // habria que comprobar si hubo un intento  de XSS y contestar con un mensaje de error reprobatorio
-        $usuario = htmlspecialchars($_POST['identificador']);
-        $password = htmlspecialchars($_POST['password']);
-
-        // nos queda: hacer la query 
-        // redireccionar a index si no está o la contraseña es errónea
-        // redireccionar a inicio.php si todo es correcto
-
-        $querySQL = "SELECT * FROM usuario WHERE idusuario = '" . $usuario . "'";
-        $resultado = $mysqli->query($querySQL);
-
-        if ($resultado->num_rows == 0) {
-            $_SESSION['error'] = "Usuario incorrecto.";
-            header("Location: ./login.php");
-        } else { // usuario encontrado 
-            $row = mysqli_fetch_object($resultado); // El objecto $row es stdClass
-    
-            if ($row->password == $password) {
-                // cojo todos los datos de este usuario y los paso como 
-                // variables de sesion
-                $_SESSION['nombre'] = $row->nombre;
-                $_SESSION['apellidos'] = $row->apellidos;
-                header("Location: ./inicio.php"); // Entra en la aplicación
-            } else {
-                $_SESSION['error'] = "Contraseña incorrecta.";
-                header("Location: ./login.php");
-                exit();
-            }
-            
-            $mysqli->close();
-        }
-    // --- VERIFICACIÓN DE CONTRASEÑA SEGURA ---
-    } else {
-    // Si intentan entrar sin enviar el formulario
-    $_SESSION["error"] = "Debes iniciar sesión para acceder.";
-    header('Location: ./login.php');
-    exit(); // Siempre salir después de una redirección
+// 2. CONEXIÓN PDO DIRECTA
+try {
+    $pdo = new PDO("mysql:host=localhost;dbname=usuarios;charset=utf8mb4", "root", "");
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Error BD: " . $e->getMessage());
 }
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+    // 3. VALIDAR TOKEN CSRF
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        die("Error de Seguridad: Token inválido");
+    }
+
+    $user = $_POST['identificador'];
+    $pass = $_POST['password'];
+
+    // 4. VERIFICAR SI EL USUARIO ESTÁ BLOQUEADO (Punto 8)
+    $stmt = $pdo->prepare("SELECT attempts, blocked_until FROM login_attempts WHERE username = :u");
+    $stmt->execute(['u' => $user]);
+    $bloqueo = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($bloqueo && $bloqueo['blocked_until']) {
+        if (new DateTime($bloqueo['blocked_until']) > new DateTime()) {
+            $_SESSION['error'] = "Usuario bloqueado. Espera 15 minutos.";
+            header("Location: login.php");
+            exit();
+        }
+    }
+
+    // 5. BUSCAR USUARIO Y VERIFICAR PASSWORD
+    $stmt = $pdo->prepare("SELECT * FROM usuario WHERE idusuario = :u");
+    $stmt->execute(['u' => $user]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row && password_verify($pass, $row['password'])) {
+        // --- ÉXITO ---
+        session_regenerate_id(true); // Punto 7
+        $_SESSION['nombre'] = $row['nombre'];
+        $_SESSION['apellidos'] = $row['apellidos'];
+        $_SESSION['CREATED'] = time();
+
+        // Limpiar intentos fallidos
+        $pdo->prepare("DELETE FROM login_attempts WHERE username = :u")->execute(['u' => $user]);
+
+        header("Location: inicio.php");
+        exit();
+
+    } else {
+        // --- FALLO ---
+        // Registrar intento
+        $sql = "INSERT INTO login_attempts (username, attempts, last_attempt) VALUES (:u, 1, NOW())
+                ON DUPLICATE KEY UPDATE attempts = attempts + 1, last_attempt = NOW()";
+        $pdo->prepare($sql)->execute(['u' => $user]);
+
+        // Bloquear si llega a 5
+        if ($bloqueo && ($bloqueo['attempts'] + 1) >= 5) {
+            $time = (new DateTime())->modify('+15 minutes')->format('Y-m-d H:i:s');
+            $pdo->prepare("UPDATE login_attempts SET blocked_until = :t WHERE username = :u")
+                ->execute(['t' => $time, 'u' => $user]);
+            $_SESSION['error'] = "Has fallado 5 veces. Bloqueado 15 mins.";
+        } else {
+            $_SESSION['error'] = "Datos incorrectos.";
+        }
+        header("Location: login.php");
+        exit();
+    }
+} else {
+    header("Location: login.php");
+}
+?>
