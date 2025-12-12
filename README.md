@@ -72,10 +72,30 @@ CREATE TABLE login_attempts (
 -- Usuario de prueba: ismael_usuario / Contraseña: Admin1234@
 INSERT INTO usuario (nombre, apellidos, idusuario, password) VALUES 
 ('Ismael', 'Gonzalez', 'ismael_usuario', '$2y$10$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquii.V3TtI93eYz.n.8EC');
+```
+---
+## 📸 Demostración y Capturas
+Aquí se muestra el programa en funcionamiento:
 
-## 💻 Tecnologías Utilizadas
-Lenguaje: [Ej: Python, JavaScript, C++]
+### 1. Menú Principal
+El usuario es recibido con las siguientes opciones:
 
-Librerías: [Ej: Pandas, NumPy, React]
+![Captura del Menú Principal](./assets/login.png)
 
-Herramientas: [Ej: Visual Studio Code, Git]
+### 2. Error
+Ejemplo metiendo datos erróneos:
+
+![Captura del Ejemplo Erróneo](./assets/login_error.png)
+
+### 3. Fallo Repetido
+El usuario introduce repetidas veces usuario y contraseña mal:
+
+![Captura del Menú Principal](./assets/login_fallo5veces.png)
+
+### 4. Ejemplo de Ejecución Exitosa
+Muestra del resultado final tras procesar los datos:
+
+![Captura de Resultado](./assets/inicio.png)
+---
+## ✒️ Autor
+**Ismael Gonzalez Tempa**
