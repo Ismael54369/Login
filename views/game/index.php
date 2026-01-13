@@ -42,7 +42,7 @@
                         <td><?php echo htmlspecialchars($j->genero); ?></td>
                         <td style="color: gold;"><?php echo $j->nota; ?>/10</td>
                         <td>
-                            <a href="index.php?c=game&m=editar&id=<?php echo $j->id; ?>" style="color:yellow;">[EDITAR]</a>
+                            <a href="index.php?c=game&m=editar&id=<?php echo $j->id; ?>" style="color:greeb;">[EDITAR]</a>
                             <a href="index.php?c=game&m=eliminar&id=<?php echo $j->id; ?>" style="color:red;" onclick="return confirm('¿BORRAR DATOS DEL JUEGO?');">[BORRAR]</a>
                         </td>
                     </tr>
