@@ -1,50 +1,87 @@
-# 👾 Login Seguro PHP - Arcade Edition
+# 👾 Videojuego DB MVC - Arcade Edition
 
 ![PHP](https://img.shields.io/badge/PHP-8.0%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)
-![MariaDB](https://img.shields.io/badge/MariaDB-10.6%2B-003545?style=for-the-badge&logo=mariadb&logoColor=white)
-![Security](https://img.shields.io/badge/Security-PDO%20%2B%20CSRF-green?style=for-the-badge)
-![Style](https://img.shields.io/badge/Style-Retro%20Pixel-ff00de?style=for-the-badge)
+![Arquitectura](https://img.shields.io/badge/Patrón-MVC-blue?style=for-the-badge)
+![Base de Datos](https://img.shields.io/badge/MariaDB-10.6%2B-003545?style=for-the-badge&logo=mariadb&logoColor=white)
+![Seguridad](https://img.shields.io/badge/Seguridad-PDO%20%2B%20CSRF-green?style=for-the-badge)
+![Licencia](https://img.shields.io/badge/Licencia-MIT-orange?style=for-the-badge)
 
-Un sistema de autenticación robusto desarrollado en **PHP nativo** y **MariaDB**. Este proyecto combina una interfaz estilo **Videojuego Retro/Cyberpunk** con estándares de seguridad modernos para proteger contra ataques comunes en aplicaciones web.
+## 📋 Descripción del Proyecto
 
----
+**Videojuego DB MVC** es una aplicación web robusta diseñada para la gestión integral (CRUD) de una biblioteca personal de videojuegos. Este proyecto representa una evolución técnica significativa desde un sistema procedimental básico hacia una **Arquitectura de Software Profesional basada en el patrón Modelo-Vista-Controlador (MVC)**.
 
-## 🛡️ Características de Seguridad Implementadas
+El objetivo principal del proyecto es demostrar cómo combinar una interfaz de usuario inmersiva (estética Retro/Cyberpunk) con prácticas de desarrollo backend de alto nivel, priorizando la escalabilidad, la limpieza del código y, sobre todo, la seguridad informática.
 
-Este proyecto cumple con 8 niveles de seguridad críticos:
 
-1.  **Validación Frontend (JS):**
-    * Control de longitud (8-15 caracteres).
-    * **Whitelist Regex:** Solo permite letras, números y los caracteres seguros `@ # $ % * ! _ -`.
-2.  **Protección de Cookies:**
-    * Flags activadas: `HttpOnly` (anti-XSS), `Secure` (si hay SSL), `SameSite=Strict`.
-    * Configuración forzada vía `ini_set` en tiempo de ejecución.
-3.  **Token Anti-CSRF:**
-    * Generación de token criptográfico único por sesión (`bin2hex`).
-    * Validación oculta en cada envío de formulario POST.
-4.  **Gestión de Sesiones:**
-    * **Anti-Fixation:** Regeneración de ID de sesión (`session_regenerate_id`) cada 30 minutos.
-    * **Timeout:** Cierre automático tras 2 horas de inactividad absoluta.
-    * **Logout Seguro:** Destrucción explícita de la cookie en el navegador y del archivo en el servidor.
-5.  **Base de Datos Segura:**
-    * Uso de **PDO** (PHP Data Objects) con Sentencias Preparadas.
-    * Defensa total contra **SQL Injection**.
-    * Contraseñas almacenadas como **HASH** usando el algoritmo BCRYPT (`password_hash` y `password_verify`).
-6.  **Protección contra Fuerza Bruta:**
-    * Sistema de bloqueo temporal de cuentas.
-    * Tras **5 intentos fallidos**, el usuario queda bloqueado por **15 minutos**.
+
+[Image of MVC architecture diagram]
+
 
 ---
 
-## 🕹️ Instalación y Puesta en Marcha
+## ✨ Características Principales
 
-### 1. Requisitos
-* Servidor Web (XAMPP, WAMP, o similar).
-* PHP 7.4 o superior.
-* MariaDB / MySQL.
+### 🏗️ Arquitectura y Diseño
+* **Patrón MVC Estricto:** Separación lógica entre la gestión de datos (Modelos), la interfaz de usuario (Vistas) y la lógica de negocio (Controladores).
+* **Enrutamiento Centralizado:** Todas las peticiones son procesadas por un único punto de entrada (`index.php`), lo que facilita el manejo de errores y la seguridad.
+* **Interfaz Retro-Gaming:** Diseño visual personalizado con CSS que emula terminales antiguos, scanlines y tipografías pixeladas.
 
-### 2. Base de Datos
-Ejecuta el siguiente script SQL en **phpMyAdmin** para crear la estructura y el usuario de prueba:
+### 🛡️ Módulo de Seguridad Avanzada
+El sistema implementa 8 capas de seguridad para proteger la integridad de la aplicación:
+1.  **Prevención de Inyección SQL:** Uso exclusivo de **PDO** con sentencias preparadas.
+2.  **Protección XSS & CSRF:** Tokens criptográficos únicos por sesión (`bin2hex`) y saneamiento de salidas.
+3.  **Seguridad de Contraseñas:** Hashing unidireccional utilizando el algoritmo **BCRYPT**.
+4.  **Blindaje de Sesiones:** Cookies configuradas con flags `HttpOnly`, `Secure` y `SameSite=Strict`.
+5.  **Anti-Fuerza Bruta:** Sistema inteligente que bloquea la cuenta tras 5 intentos fallidos durante 15 minutos.
+6.  **Validación Dual:** Verificación de datos tanto en cliente (JavaScript) como en servidor (PHP).
+
+### 🎮 Funcionalidades CRUD
+* **Create:** Registro de nuevos títulos con metadatos (Género, Nota, Reseña).
+* **Read:** Visualización tabular de la colección con indicadores visuales de puntuación.
+* **Update:** Edición completa de registros existentes.
+* **Delete:** Eliminación segura de registros con confirmación previa.
+
+---
+
+## 📂 Estructura del Directorio
+
+El proyecto sigue una estructura de directorios estándar para aplicaciones MVC en PHP:
+
+```text
+/Videojuego-MVC
+│
+├── /config
+│   └── db.php              # Singleton para conexión a Base de Datos (PDO)
+│
+├── /controllers
+│   ├── AuthController.php  # Lógica de Login, Logout y Seguridad
+│   └── GameController.php  # Lógica del CRUD de Videojuegos
+│
+├── /models
+│   ├── Usuario.php         # Interacción con tabla de usuarios
+│   └── Videojuego.php      # Interacción con tabla de videojuegos
+│
+├── /views
+│   ├── /auth               # Plantillas de Autenticación (Login)
+│   └── /game               # Plantillas del Panel de Control (CRUD)
+│
+├── index.php               # Router / Front Controller
+└── validacion.js           # Validaciones Frontend
+```
+
+---
+
+## ⚙️ Instrucciones de Instalación
+
+Sigue estos pasos para desplegar el entorno de desarrollo en tu máquina local:
+
+### 1. Requisitos Previos
+* **Servidor Web:** Apache o Nginx (Recomendado: XAMPP, WAMP o Laragon).
+* **PHP:** Versión 7.4 o superior (Compatible con PHP 8.x).
+* **Base de Datos:** MySQL o MariaDB.
+
+### 2. Configuración de la Base de Datos
+Accede a tu gestor de base de datos (ej. phpMyAdmin) y ejecuta el siguiente script SQL para generar la estructura y el usuario administrador:
 
 ```sql
 CREATE DATABASE IF NOT EXISTS usuarios;
@@ -59,7 +96,16 @@ CREATE TABLE usuario (
     password VARCHAR(255) NOT NULL
 );
 
--- Tabla de Intentos de Login
+-- Tabla de Videojuegos
+CREATE TABLE videojuegos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(100) NOT NULL,
+    genero VARCHAR(50),
+    nota INT,
+    resena TEXT
+);
+
+-- Tabla de Seguridad (Intentos de Login)
 CREATE TABLE login_attempts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
@@ -69,33 +115,51 @@ CREATE TABLE login_attempts (
     UNIQUE KEY unique_user (username)
 );
 
--- Usuario de prueba: ismael_usuario / Contraseña: Admin1234@
+-- Usuario Administrador por defecto
+-- Usuario: ismael_usuario
+-- Contraseña: Agente@007
 INSERT INTO usuario (nombre, apellidos, idusuario, password) VALUES 
 ('Ismael', 'Gonzalez', 'ismael_usuario', '$2y$10$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquii.V3TtI93eYz.n.8EC');
 ```
+
+### 3. Configuración del Proyecto
+1. Clona o descarga este repositorio en la carpeta pública de tu servidor web (ej. `C:\xampp\htdocs\Videojuego-MVC`).
+2. Abre el archivo `config/db.php` y verifica que las credenciales coincidan con tu entorno local:
+
+```php
+$host = 'localhost';
+$db = 'usuarios';
+$user = 'root'; // Tu usuario SQL
+$pass = '';     // Tu contraseña SQL
+```
+
 ---
-## 📸 Demostración y Capturas
-Aquí se muestra el programa en funcionamiento:
 
-### 1. Menú Principal
-El usuario es recibido con las siguientes opciones:
+## 🚀 Guía de Uso
 
-![Captura del Menú Principal](./assets/login.png)
+1. **Acceso:** Abre tu navegador y dirígete a `http://localhost/Videojuego-MVC/`.
+2. **Login:** Serás redirigido automáticamente al formulario de inicio de sesión.
+   * **Usuario:** `ismael_usuario`
+   * **Contraseña:** `Agente@007`
+3. **Panel de Control:** Una vez autenticado, accederás a la **Biblioteca Gamer**.
+   * Utiliza el botón **+ AÑADIR NUEVO JUEGO** para registrar entradas.
+   * Utiliza los botones de **EDITAR** o **BORRAR** en la tabla para gestionar juegos existentes.
+4. **Cierre de Sesión:** Pulsa en `[SALIR (LOGOUT)]` en la esquina superior derecha para destruir la sesión de forma segura.
 
-### 2. Error
-Ejemplo metiendo datos erróneos:
-
-![Captura del Ejemplo Erróneo](./assets/login_error.png)
-
-### 3. Fallo Repetido
-El usuario introduce repetidas veces usuario y contraseña mal:
-
-![Captura del Menú Principal](./assets/login_fallo5veces.png)
-
-### 4. Ejemplo de Ejecución Exitosa
-Muestra del resultado final tras procesar los datos:
-
-![Captura de Resultado](./assets/inicio.png)
 ---
-## ✒️ Autor
-**Ismael Gonzalez Tempa**
+
+## 📄 Licencia
+
+Este proyecto se distribuye bajo la licencia **MIT**. Eres libre de usar, modificar y distribuir este software, siempre y cuando se incluya el aviso de copyright original.
+
+---
+
+## 📞 Contacto y Soporte
+
+Si encuentras algún problema de seguridad o tienes dudas sobre la implementación:
+
+* **Desarrollador:** Ismael Gonzalez Tempa
+* **Reporte de Problemas:** Por favor, abre un "Issue" en el repositorio de GitHub.
+
+---
+*Developed with ❤️ and PHP*
